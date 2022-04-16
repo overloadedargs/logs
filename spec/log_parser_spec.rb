@@ -20,18 +20,12 @@ describe 'LogParser' do
   end
 
   context 'processing_log' do
-    describe '.process_log' do
-      it 'should be able to create a hash of uri and ip entries' do
-        log_parser = LogParser.new.process_log
-        expect(log_parser["L2Fib3V0\n"].include?('100.114.232.150')).to be true
-      end
-    end
 
     describe '.has_hit?' do
       it 'should be able to check if there is a hit' do
         log_parser = LogParser.new
         log_parser.process_log
-        expect(log_parser.has_hit?('233.57.149.50')).to be true
+        expect(log_parser.has_hit?('233.57.149.50', Base64.encode64('/about'))).to be true
       end
     end
 
@@ -39,7 +33,7 @@ describe 'LogParser' do
       it 'should be able to check if an ip went to a url' do
         log_parser = LogParser.new
         log_parser.process_log
-        expect(log_parser.has_url?(Base64.encode64('/products'))).to be true
+        expect(log_parser.has_url?('123.233.150.93', Base64.encode64('/products'))).to be true
       end
     end
   end
@@ -60,6 +54,15 @@ describe 'LogParser' do
       log_parser.process_log
       views = [[:"/deals", 90], [:"/faq", 89], [:"/support", 82], [:"/about", 81], [:"/products", 80], [:"/home", 78]]
       expect(log_parser.sorted_views).to eq(views)
+    end
+  end
+
+  context '.unique_views' do
+    it 'should be able to get the sorted page views' do
+      log_parser = LogParser.new
+      log_parser.process_log
+      unique_views = [["/support", 23], ["/home", 23], ["/faq", 23], ["/products", 23], ["/deals", 22], ["/about", 21]]
+      expect(log_parser.unique_views).to eq(unique_views)
     end
   end
 end
